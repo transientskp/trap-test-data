@@ -191,7 +191,7 @@ centrera_hms = ratohms(centrera)
 centredec_dms = dectodms(centredec)
 centrerapix = hdulist[0].header['crpix1']
 centredecpix = hdulist[0].header['crpix2']
-print "\nImage co-ordinates:\nRA: ",centrera_hms[0],centrera_hms[1],"%5.2f" % centrera_hms[2],"\nDec: ",centredec_dms[0],centredec_dms[1],centredec_dms[2],"%5.2f" % centredec_dms[3]
+print("\nImage co-ordinates:\nRA: ",centrera_hms[0],centrera_hms[1],"%5.2f" % centrera_hms[2],"\nDec: ",centredec_dms[0],centredec_dms[1],centredec_dms[2],"%5.2f" % centredec_dms[3])
 # Pull out central RA and Dec and the relevant pixel numbers from the header
 
 raincr = hdulist[0].header['cdelt1']
@@ -212,11 +212,11 @@ majoraxis = eval(cleanbeam[20:30])
 minoraxis = eval(cleanbeam[38:48])
 posangle = eval(cleanbeam[53:60])
 # Pull out clean beam parameters from header
-print "\nRA pixel increment: %6.2e" % raincr_as,"arcsec\nDec pixel increment: %6.2e" % decincr_as,"arcsec"
+print("\nRA pixel increment: %6.2e" % raincr_as,"arcsec\nDec pixel increment: %6.2e" % decincr_as,"arcsec")
 
 bmaj = -1*majoraxis/raincr
 bmin = minoraxis/decincr
-print "\nRestoring beam:\nMajor axis: %7.4f" % bmaj,"pixels\nMinor axis: %7.4f" % bmin,"pixels\nPA: ",posangle,"degs"
+print("\nRestoring beam:\nMajor axis: %7.4f" % bmaj,"pixels\nMinor axis: %7.4f" % bmin,"pixels\nPA: ",posangle,"degs")
 # Convert FWHM of major and minor axes to number of pixels
 
 hdulist.close()
@@ -226,15 +226,15 @@ hdulist.close()
 ydim=2048
 xdim=2048
 
-print "\nImage dimensions: ",xdim," x ",ydim,"\n"
+print("\nImage dimensions: ",xdim," x ",ydim,"\n")
 source_beam=np.fromfunction(source_gauss, (2*xdim-1,2*ydim-1))
 norm_sb=np.sum(source_beam)
-print 'np.sum(source_beam)=',norm_sb
+print('np.sum(source_beam)=',norm_sb)
 clean_beam=np.fromfunction(gauss, (2*xdim-1,2*ydim-1))
 norm_cb=np.sum(clean_beam)
-print 'np.sum(clean_beam)=',norm_cb
-print 'product of the two sums=',norm_sb*norm_cb
-print
+print('np.sum(clean_beam)=',norm_cb)
+print('product of the two sums=',norm_sb*norm_cb)
+print()
 # Make a grid of sources
 index_arr=np.indices((xdim,ydim))
 condition=(np.mod(index_arr[0],32)==0) & (np.mod(index_arr[1],32)==0)
@@ -249,8 +249,8 @@ if os.path.exists('SOURCES.FITS'):
 pyfits.writeto('SOURCES.FITS',sources,header)
 volume_sources=np.sum(sources)
 number_sources=np.sum(deltas)/peak
-print 'This is the total volume of the sources, the number of sources and the volume per source:',volume_sources,number_sources,volume_sources/number_sources
-print
+print('This is the total volume of the sources, the number of sources and the volume per source:',volume_sources,number_sources,volume_sources/number_sources)
+print()
 convolved_sources=fftconvolve(sources,clean_beam,mode='valid')
 if os.path.exists('CONVOLVED_SOURCES.FITS'):
     os.remove('CONVOLVED_SOURCES.FITS')
@@ -261,18 +261,18 @@ sci_clip = np.where(convolved_sources > peak, 1, 0)
 sci_labels, sci_num = ndimage.label(sci_clip)
 maximum_values=ndimage.maximum(convolved_sources,sci_labels,np.arange(sci_num+1)[1:])
 # print 'The maximum values are:',maximum_values
-print 'The mean is:',np.mean(maximum_values)
-print 'The std is:',np.std(maximum_values)
+print('The mean is:',np.mean(maximum_values))
+print('The std is:',np.std(maximum_values))
 max_max=np.max(maximum_values)
-print 'The maximum is:',max_max
+print('The maximum is:',max_max)
 min_max=np.min(maximum_values)
-print 'The minimum is:',min_max
-print 'The difference between min_max and max_max is:',max_max-min_max
-print
+print('The minimum is:',min_max)
+print('The difference between min_max and max_max is:',max_max-min_max)
+print()
 # Import the dirty beam for convolution with the uncorrelated pixels.
 hdulist_beam = pyfits.open("%s"%currentdir+"/"+"%s"%'DIRTY_BEAM.FITS')
 dirty_beam=hdulist_beam[0].data[0,0,:,:]
-print 'np.sum(dirty_beam)=',np.sum(dirty_beam)
+print('np.sum(dirty_beam)=',np.sum(dirty_beam))
 hdulist_beam.close()
 
 no_iter=1
@@ -308,15 +308,15 @@ while i<no_iter:
         os.remove('TEST_DECONV.FITS')
     pyfits.writeto('TEST_DECONV.FITS',test_pixels,header)
     if np.mod(i+1,100)==0:
-        print i+1
+        print(i+1)
     i+=1
 
 np.save('uncorr_dat',uncorr_data)
 np.save('corr_dat',corr_data)
 
-print 'This is the significance (in sigma) of the mean of the means of the uncorrelated noise maps:',np.mean(uncorr_data[:,1])/(np.mean(uncorr_data[:,0])/np.sqrt(uncorrelated_pixels.size*no_iter))
+print('This is the significance (in sigma) of the mean of the means of the uncorrelated noise maps:',np.mean(uncorr_data[:,1])/(np.mean(uncorr_data[:,0])/np.sqrt(uncorrelated_pixels.size*no_iter)))
 
-print 'This is the significance (in sigma) of the mean of the means of the correlated noise maps:',np.mean(corr_data[:,1])/(np.mean(corr_data[:,0])/np.sqrt(correlated_pixels.size*no_iter*30./1024.))
+print('This is the significance (in sigma) of the mean of the means of the correlated noise maps:',np.mean(corr_data[:,1])/(np.mean(corr_data[:,0])/np.sqrt(correlated_pixels.size*no_iter*30./1024.)))
 if os.path.exists('CORRELATED_NOISE.FITS'):
     os.remove('CORRELATED_NOISE.FITS')
 pyfits.writeto('CORRELATED_NOISE.FITS',correlated_pixels,header)
